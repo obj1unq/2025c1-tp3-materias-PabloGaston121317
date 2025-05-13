@@ -1,0 +1,54 @@
+import materia.*
+describe "Materia" {
+
+   var  programacion = new Carrera()
+   var medicina = new Carrera()
+   var derecho = new Carrera()
+
+   var elementosProgramacion = new Materia()
+    var objetos1 = new Materia( )
+    var matematicas1 = new Materia()
+   var objetos2 = new Materia()
+   var objetos3 = new Materia()
+   var trabajoFinal = new Materia()
+   var baseDeDatos = new Materia()
+
+   var quimica = new Materia()
+   var bio1 = new Materia()
+   var bio2 = new Materia()
+   var anaGeneral = new Materia()
+
+   var latin = new Materia()
+   var derechoRomano = new Materia()
+   var historia = new Materia()
+   var derechoPenal = new Materia()
+   var derechoPenal2 = new Materia()
+
+   var roque = new Estudiante()
+
+
+   method initialize(){
+
+
+
+    roque.cursar(programacion)
+    roque.cursar(medicina)
+
+    roque.aprobar(objetos1, 8)
+    roque.aprobar(matematicas1, 10)
+
+    programacion.agregarMateria(objetos1)
+    programacion.agregarMateria(matematicas1)
+    
+   }
+  test "carlos tiene la materia objetos 1 aprobada con 8" {
+ 
+
+    assert.equals(#{objetos1,matematicas1}, roque.materiasAprobadas())
+
+
+
+
+    
+  }
+}
