@@ -1,54 +1,83 @@
 import materia.*
 describe "Materia" {
 
-   var  programacion = new Carrera()
-   var medicina = new Carrera()
-   var derecho = new Carrera()
+   const programacion = new Carrera()
+   const medicina = new Carrera()
 
-   var elementosProgramacion = new Materia()
-    var objetos1 = new Materia( )
-    var matematicas1 = new Materia()
-   var objetos2 = new Materia()
-   var objetos3 = new Materia()
-   var trabajoFinal = new Materia()
-   var baseDeDatos = new Materia()
+   const elemProgramacion = new Materia()
+   const objetos1 = new Materia()
+   const objetos2 = new Materia()
+   const matematicas1 = new Materia()
+   const objetos3 = new Materia()
+   const trabajoFinal = new Materia()
+   const baseDatos = new Materia()
 
-   var quimica = new Materia()
-   var bio1 = new Materia()
-   var bio2 = new Materia()
-   var anaGeneral = new Materia()
+   const quimica = new Materia()
+   const bio1 = new Materia()
+   const bio2 = new Materia()
+   const anaGeneral = new Materia()
 
-   var latin = new Materia()
-   var derechoRomano = new Materia()
-   var historia = new Materia()
-   var derechoPenal = new Materia()
-   var derechoPenal2 = new Materia()
-
-   var roque = new Estudiante()
+   const roque = new Estudiante()
 
 
    method initialize(){
 
 
-
     roque.cursar(programacion)
     roque.cursar(medicina)
 
+    programacion.agregarMateria(elemProgramacion)
+    programacion.agregarMateria(objetos1)
+    programacion.agregarMateria(objetos2)
+    programacion.agregarMateria(objetos3)
+    programacion.agregarMateria(matematicas1)
+    programacion.agregarMateria(trabajoFinal)
+    programacion.agregarMateria(baseDatos)
+
+    medicina.agregarMateria(quimica)
+    medicina.agregarMateria(bio1)
+    medicina.agregarMateria(bio2)
+    medicina.agregarMateria(anaGeneral)
+    
+    
     roque.aprobar(objetos1, 8)
     roque.aprobar(matematicas1, 10)
 
-    programacion.agregarMateria(objetos1)
-    programacion.agregarMateria(matematicas1)
     
    }
-  test "carlos tiene la materia objetos 1 aprobada con 8" {
+  test "cantidad de materias aprobadas de roque , 2 (matematica1 , objetos1)" {
  
 
-    assert.equals(#{objetos1,matematicas1}, roque.materiasAprobadas())
+    assert.equals(2, roque.cantidadAprobadas())
 
 
 
 
     
   }
+
+  test "promedio  de roque, objetos1 aprobado con 8 y matematicas con 10, promedio 9" {
+    
+    assert.equals(9, roque.promedio())
+  }
+
+
+  test "roque tiene aprobada matematicas 1  pero no tiene aprobada objetos2" {
+    
+    assert.that(roque.tieneAprobada(matematicas1))
+    assert.notThat(roque.tieneAprobada(objetos2))
+    
+  }
+
+  test "se quiere registar una materia aprobada a roque (matematicas1) pero ya la tiene aprobada" {
+    assert.throwsException({ roque.aprobar(matematicas1,10) })
+  }
+
+  test "todas las materias  en las que roque esta inscripto,   todas las de programacion y medicina " {
+    
+    assert.equals(#{elemProgramacion,matematicas1,objetos1,
+                   objetos2,objetos3,trabajoFinal,baseDatos,quimica,bio1,bio2,anaGeneral}, roque.materiasInscriptas())
+  }
+
+
 }

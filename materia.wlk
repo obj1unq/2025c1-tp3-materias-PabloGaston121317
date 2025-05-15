@@ -2,31 +2,17 @@ class Estudiante {
     const materiasAprobadas = #{}
     const carreras = #{}
     
-
-    method aprobar(materia,nota){
+    // el objeto aprobacion para crear  las materias aprobadas y guardarlas  en la coleccion materias aprobadas
+    method aprobar(materia,nota){  
         self.validacionAprobar(materia)
-        const materiaAprobada = new Aprobacion (estudiante = self,materia=materia,nota=nota)
+        const materiaAprobada = new Aprobacion (materia=materia,nota=nota)
         materiasAprobadas.add(materiaAprobada)
     }
 
-    method aprobadas(){
-
-        return materiasAprobadas.map({materia=> materia.nombre()}).asSet()
-    }
-
     method validacionAprobar(materia){
-        if( self. estaAprobada(materia)){
-            self.error("Ya Aaprobaste esta materia")
+        if( self.tieneAprobada(materia)){
+            self.error("Ya tiene  aprobada " + materia)
         }
-    }
-
-    method  materiasDeLasCarreras(){
-        return self.materiasDeCarrera().flatten()
-    }
-
-    method materiasDeCarrera(){
-
-        return carreras.map({carrera=>carrera.materias()})
     }
 
     method cursar(carrera){
@@ -37,32 +23,45 @@ class Estudiante {
 
     method promedio() = self.notasDeMaterias().sum() / self.cantidadAprobadas()
 
-    method notasDeMaterias() = materiasAprobadas.map({materia => materia.nota(self)})
+    method notasDeMaterias() = materiasAprobadas.map({materia => materia.nota()})
 
     method cantidadAprobadas() = materiasAprobadas.size()
 
-    method estaAprobada(materia) = materiasAprobadas.contains(materia)
+    method tieneAprobada(materia) = materiasAprobadas.any({aprobacion => aprobacion.materia() == materia})
 
     method materiasAprobadas() = materiasAprobadas
+
+    method materiasInscriptas() = self.todasLasMaterias().asSet()
+
+    method todasLasMaterias() = carreras.map({carrera => carrera.materias()}).flatten()
+
+    // punto 5... 4 condiciones para que el alumno pueda inscribirse  en la materia. No esta terminado
+    method puedeInscribirse(materia){
+
+        return self.materiaPorCursar(materia) && (! self.tieneAprobada(materia)) && materia.estaInscripto(self) && self.puedeCursar(materia)
+    }
+
+    method materiaPorCursar(materia) = carreras.any({carrera => carrera.tieneMateria(materia)})
+
+    method puedeCursar(materia) = materia.requisitos()
 
 }
 
 class Materia {
     
-    const estudiantesCursando = #{}
-
-    method agregarEstudiante(estudiante){
-        estudiantesCursando.add(estudiante)
-    }
-
- 
 }
 
 class Aprobacion {
 
-    var estudiante
-    var materia
-    var nota
+    
+    const materia
+    const nota
+
+   
+
+    method materia() = materia
+
+    method nota() = nota
 
 
 
@@ -75,4 +74,8 @@ class Carrera {
 
         materias.add(materia)
     }
+
+    method tieneMateria(materia) = materias.contains(materia)
+
+    method materias() = materias
 }
