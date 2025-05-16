@@ -4,20 +4,27 @@ describe "Materia" {
    const programacion = new Carrera()
    const medicina = new Carrera()
 
-   const elemProgramacion = new Materia()
-   const objetos1 = new Materia()
-   const objetos2 = new Materia()
-   const matematicas1 = new Materia()
-   const objetos3 = new Materia()
-   const trabajoFinal = new Materia()
-   const baseDatos = new Materia()
+   const elemProgramacion = new Materia(creditos = 10, año = 1 ,requerimiento = new Nada())
+   const objetos1 = new Materia(creditos = 100, año = 2, requerimiento = new PorAño(año=1))
+   const matematicas1 = new Materia(creditos = 300,año=1, requerimiento= new Nada())
+   const baseDatos = new Materia(creditos = 100,año=1,requerimiento = new Credito(creditosNecesarios=100))
+   const objetos2 = new Materia(creditos= 200, año = 2, requerimiento = new Correlativa(correlativas=#{objetos1,matematicas1}))
+   const objetos3 = new Materia(creditos = 400, año = 3, requerimiento= new Correlativa(correlativas= #{objetos2,baseDatos}))
+   const trabajoFinal = new Materia(creditos= 100,año=2,requerimiento = new Credito(creditosNecesarios = 50))
+   
 
-   const quimica = new Materia()
-   const bio1 = new Materia()
-   const bio2 = new Materia()
-   const anaGeneral = new Materia()
+   const concurrente = new Materia(creditos=150,año=3,requerimiento = new Correlativa(correlativas= #{objetos1,baseDatos}))
+
+   const quimica = new Materia(creditos=50,año=1,requerimiento= new Nada())
+   const bio1 = new Materia(creditos=50,año=1,requerimiento= new Nada())
+   const bio2 = new Materia(creditos=100,año=2,requerimiento = new Correlativa(correlativas=#{bio1}))
+   const anaGeneral = new Materia(creditos=100, año=1, requerimiento= new Credito(creditosNecesarios=30))
 
    const roque = new Estudiante()
+   const luisa = new Estudiante()
+   const romina = new Estudiante()
+   const alicia = new Estudiante()
+   const ana = new Estudiante()
 
 
    method initialize(){
@@ -25,6 +32,11 @@ describe "Materia" {
 
     roque.cursar(programacion)
     roque.cursar(medicina)
+    luisa.cursar(programacion)
+    romina.cursar(programacion)
+    alicia.cursar(programacion)
+    ana.cursar(programacion)
+
 
     programacion.agregarMateria(elemProgramacion)
     programacion.agregarMateria(objetos1)
@@ -33,22 +45,53 @@ describe "Materia" {
     programacion.agregarMateria(matematicas1)
     programacion.agregarMateria(trabajoFinal)
     programacion.agregarMateria(baseDatos)
+    programacion.agregarMateria(concurrente)
+
+    medicina.agregarMateria(quimica)
+    medicina.agregarMateria(anaGeneral)
+    medicina.agregarMateria(bio1)
+    medicina.agregarMateria(bio2)
+
+    bio2.agregarCoorrelativa(bio1)
 
     objetos2.agregarCoorrelativa(objetos1)
     objetos2.agregarCoorrelativa(matematicas1)
+    objetos2.cupoMaximo(3)
 
-    objetos3.agregarCoorrelativa(objetos1)
+    
     objetos3.agregarCoorrelativa(objetos2)
-    objetos3.agregarCoorrelativa(matematicas1)
+    objetos3.agregarCoorrelativa(baseDatos)
+
+    concurrente.agregarCoorrelativa(objetos1)
+    concurrente.agregarCoorrelativa(baseDatos)
 
     medicina.agregarMateria(quimica)
     medicina.agregarMateria(bio1)
     medicina.agregarMateria(bio2)
     medicina.agregarMateria(anaGeneral)
+
+    luisa.aprobar(elemProgramacion, 10)
+    luisa.aprobar(objetos1, 10)
+    luisa.aprobar(matematicas1, 10)
+
+    romina.aprobar(elemProgramacion, 7)
+    romina.aprobar(objetos1, 7)
+    romina.aprobar(matematicas1, 7)
+
+    alicia.aprobar(elemProgramacion, 8)
+    alicia.aprobar(objetos1, 7)
+    alicia.aprobar(matematicas1, 6)
+
+    ana.aprobar(elemProgramacion, 9)
     
     
     roque.aprobar(objetos1, 8)
     roque.aprobar(matematicas1, 10)
+    roque.aprobar(elemProgramacion,8)
+    roque.aprobar(baseDatos, 6)
+
+    roque.aprobar(quimica, 5)
+    roque.aprobar(bio1, 6)
 
 
     
@@ -56,7 +99,7 @@ describe "Materia" {
   test "cantidad de materias aprobadas de roque , 2 (matematica1 , objetos1)" {
  
 
-    assert.equals(2, roque.cantidadAprobadas())
+    assert.equals(6, roque.cantidadAprobadas())
 
 
 
@@ -66,7 +109,7 @@ describe "Materia" {
 
   test "promedio  de roque, objetos1 aprobado con 8 y matematicas con 10, promedio 9" {
     
-    assert.equals(9, roque.promedio())
+    assert.equals(7.16667, roque.promedio())
   }
 
 
@@ -84,7 +127,7 @@ describe "Materia" {
   test "todas las materias  en las que roque esta inscripto,   todas las de programacion y medicina " {
     
     assert.equals(#{elemProgramacion,matematicas1,objetos1,
-                   objetos2,objetos3,trabajoFinal,baseDatos,quimica,bio1,bio2,anaGeneral}, roque.materiasInscriptas())
+                   objetos2,objetos3,trabajoFinal,baseDatos,concurrente,quimica,bio1,bio2,anaGeneral}, roque.materiasQueDebeCursar())
   }
 
  test "objetos2 corresponde a una carrera que cursa roque" {
@@ -117,6 +160,73 @@ describe "Materia" {
     assert.throwsException({ roque.inscribirse(objetos3) })
 
     
+  }
+
+  test "roque se da de baja en objetos 2  y  se inscribe en la materia rosita" {
+    roque.inscribirse(objetos2)
+
+   const rosita = new Estudiante()
+   rosita.cursar(programacion)
+   rosita.aprobar(objetos1, 10)
+   rosita.aprobar(matematicas1, 10)
+
+   assert.that(roque.estaInscripto(objetos2))
+
+   objetos2.agregarEspera(rosita)
+   objetos2.darDeBaja(roque)
+
+   assert.equals([], objetos2.estudiantesEspera())
+   assert.that(rosita.estaInscripto(objetos2))
+   assert.notThat(roque.estaInscripto(objetos2))
+
+  }
+
+  test "materias en las que roque esta inscripto" {
+    roque.inscribirse(objetos2)
+    assert.equals(#{objetos2}, roque.materiasInscriptas())
+    trabajoFinal.agregarEspera(roque)
+    assert.equals([trabajoFinal], roque.materiasEnEspera())
+  }
+
+  test "materias en la que roque puede inscribirse de la carrera programacion" {
+    roque.aprobar(objetos2, 7)
+    
+    assert.equals(#{concurrente,objetos3,trabajoFinal}, roque.materiasEnlasQuePuedeInscribirse(programacion))
+  }
+
+  test "roque  puede inscribirse en objetos2, pero no en objetos3, ni en objetos1 ya que la tiene aprobada" {
+    assert.that(roque.puedeInscribirse(objetos2))
+    assert.notThat(roque.puedeInscribirse(objetos3))
+    assert.notThat(roque.puedeInscribirse(objetos1))
+  }
+
+  test "roque puede inscribirse en objetos2 y programacion concurrente, y de medicina en biologia2" {
+    assert.that(roque.puedeInscribirse(objetos2))
+    assert.that(roque.puedeInscribirse(concurrente))
+    assert.that(roque.puedeInscribirse(bio2))
+  }
+
+  test "se inscriben  luisa,romina,alicia y roque en obejtos2 , las 3 primeras quedan ocnfirmadas y toque en lista de espera" {
+   luisa.inscribirse(objetos2)
+   romina.inscribirse(objetos2)
+   alicia.inscribirse(objetos2)
+   roque.inscribirse(objetos2)
+
+   assert.equals(#{luisa,romina,alicia}, objetos2.inscriptos())
+   assert.equals([roque], objetos2.estudiantesEspera())
+  }
+
+  test "romina se da de baja en objetos 2 entonces roque pasa a tener la confirmacion de la materia"
+   {
+    luisa.inscribirse(objetos2)
+    romina.inscribirse(objetos2)
+    alicia.inscribirse(objetos2)
+    roque.inscribirse(objetos2)
+
+    romina.darDeBajaEn(objetos2)
+
+    assert.equals(#{luisa,alicia,roque},objetos2.inscriptos())
+    assert.notThat(romina.estaInscripto(objetos2))
   }
 
 
