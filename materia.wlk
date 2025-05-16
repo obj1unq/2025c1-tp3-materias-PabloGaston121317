@@ -38,16 +38,34 @@ class Estudiante {
     // punto 5... 4 condiciones para que el alumno pueda inscribirse  en la materia. No esta terminado
     method puedeInscribirse(materia){
 
-        return self.materiaPorCursar(materia) && (! self.tieneAprobada(materia)) && materia.estaInscripto(self) && self.puedeCursar(materia)
+        return materia.correspondeACarrera(self) && (! self.tieneAprobada(materia)) && (!self.estaInscripto(materia)) && self.esAptoParaCursar(materia)
     }
 
-    method materiaPorCursar(materia) = carreras.any({carrera => carrera.tieneMateria(materia)})
+    method estaInscripto(materia) = materia.estaInscripto(self)
 
-    method puedeCursar(materia) = materia.requisitos()
+    method tieneQueCursar(materia) = carreras.any({carrera => carrera.materias().contains(materia)})
+
+    method esAptoParaCursar(materia) = materia.coorrelativas().all({materia => self.tieneAprobada(materia)})
 
 }
 
 class Materia {
+    const inscriptos = #{}
+    const coorrelativas= #{}
+
+    method agregarCoorrelativa(materia){
+        coorrelativas.add(materia)
+    }
+
+    method inscribir(estudiante){
+        inscriptos.add(estudiante)
+    }
+
+    method correspondeACarrera(estudiante) = estudiante.tieneQueCursar(self)
+
+    method estaInscripto(estudiante) = inscriptos.contains(estudiante)
+
+    method coorrelativas() = coorrelativas
     
 }
 

@@ -34,6 +34,9 @@ describe "Materia" {
     programacion.agregarMateria(trabajoFinal)
     programacion.agregarMateria(baseDatos)
 
+    objetos2.agregarCoorrelativa(objetos1)
+    objetos2.agregarCoorrelativa(matematicas1)
+
     medicina.agregarMateria(quimica)
     medicina.agregarMateria(bio1)
     medicina.agregarMateria(bio2)
@@ -42,6 +45,7 @@ describe "Materia" {
     
     roque.aprobar(objetos1, 8)
     roque.aprobar(matematicas1, 10)
+
 
     
    }
@@ -79,5 +83,28 @@ describe "Materia" {
                    objetos2,objetos3,trabajoFinal,baseDatos,quimica,bio1,bio2,anaGeneral}, roque.materiasInscriptas())
   }
 
+ test "objetos2 corresponde a una carrera que cursa roque" {
+
+    assert.that(objetos2.correspondeACarrera(roque))
+   
+ }
+
+ test "roque todavia no aprobo objetos2" {
+   assert.notThat(roque.tieneAprobada(objetos2))
+ }
+
+ test "roque no debe estar inscripto en objetos 2 " {
+   assert.notThat(roque.estaInscripto(objetos2))
+ }
+
+ test "roque Debe tener  todas las materias que tienen como correlativa a objetos2 (objetos1,matematicas1)" {
+   assert.that(roque.esAptoParaCursar(objetos2))
+ }
+
+
+
+  //test "verificar si puede inscribirse  en objetos2" {
+  //  assert.that(roque.puedeInscribirse(objetos2))
+ // }
 
 }
