@@ -37,6 +37,10 @@ describe "Materia" {
     objetos2.agregarCoorrelativa(objetos1)
     objetos2.agregarCoorrelativa(matematicas1)
 
+    objetos3.agregarCoorrelativa(objetos1)
+    objetos3.agregarCoorrelativa(objetos2)
+    objetos3.agregarCoorrelativa(matematicas1)
+
     medicina.agregarMateria(quimica)
     medicina.agregarMateria(bio1)
     medicina.agregarMateria(bio2)
@@ -101,10 +105,20 @@ describe "Materia" {
    assert.that(roque.esAptoParaCursar(objetos2))
  }
 
+ test "roque puede inscribirse en objetos2" {
+
+    assert.that(roque.puedeInscribirse(objetos2))
+ }
+
+  test "roque queda inscripto en  objetos 2 pero no puede inscribirse  en objetos 3" {
+    roque.inscribirse(objetos2)
+
+    assert.that(roque.estaInscripto(objetos2))
+    assert.throwsException({ roque.inscribirse(objetos3) })
+
+    
+  }
 
 
-  //test "verificar si puede inscribirse  en objetos2" {
-  //  assert.that(roque.puedeInscribirse(objetos2))
- // }
-
+ 
 }

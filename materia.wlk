@@ -43,29 +43,51 @@ class Estudiante {
 
     method estaInscripto(materia) = materia.estaInscripto(self)
 
-    method tieneQueCursar(materia) = carreras.any({carrera => carrera.materias().contains(materia)})
-
+    method tieneQueCursar(materia) = self.todasLasMaterias().contains(materia)
+    
     method esAptoParaCursar(materia) = materia.coorrelativas().all({materia => self.tieneAprobada(materia)})
+
+    method inscribirse(materia){
+        self.validarInscribirse(materia)
+        materia.inscribir(self)
+    }
+
+    method validarInscribirse(materia){
+
+        if(!self.puedeInscribirse(materia)){
+            self.error("No es posible Inscribirse en " + materia)
+        }
+    }
 
 }
 
 class Materia {
     const inscriptos = #{}
     const coorrelativas= #{}
+    const cupoMaximo = 30
+    const estudiantesEspera = #{}
 
     method agregarCoorrelativa(materia){
         coorrelativas.add(materia)
     }
 
     method inscribir(estudiante){
+        if(cupoMaximo > self.cantInscriptos()){
         inscriptos.add(estudiante)
+        } else {
+            estudiantesEspera.add(estudiante)
+        }
     }
+
+    method cantInscriptos() = self.inscriptos().size()
 
     method correspondeACarrera(estudiante) = estudiante.tieneQueCursar(self)
 
     method estaInscripto(estudiante) = inscriptos.contains(estudiante)
 
     method coorrelativas() = coorrelativas
+
+    method inscriptos() = inscriptos
     
 }
 
