@@ -4,21 +4,21 @@ describe "Materia" {
    const programacion = new Carrera()
    const medicina = new Carrera()
 
-   const elemProgramacion = new Materia(creditos = 10, año = 1 ,requerimiento = new Nada())
-   const objetos1 = new Materia(creditos = 100, año = 2, requerimiento = new PorAño(año=1))
-   const matematicas1 = new Materia(creditos = 300,año=1, requerimiento= new Nada())
-   const baseDatos = new Materia(creditos = 100,año=1,requerimiento = new Credito(creditosNecesarios=100))
-   const objetos2 = new Materia(creditos= 200, año = 2, requerimiento = new Correlativa(correlativas=#{objetos1,matematicas1}))
-   const objetos3 = new Materia(creditos = 400, año = 3, requerimiento= new Correlativa(correlativas= #{objetos2,baseDatos}))
-   const trabajoFinal = new Materia(creditos= 100,año=2,requerimiento = new Credito(creditosNecesarios = 50))
+   const elemProgramacion = new Materia(creditos = 10, año = 1 ,requerimiento = new Nada(),estrategiaInscripcion= new OrdenDeLlegada())
+   const objetos1 = new Materia(creditos = 100, año = 2, requerimiento = new PorAño(año=1),estrategiaInscripcion= new Elitista())
+   const matematicas1 = new Materia(creditos = 300,año=1, requerimiento= new Nada(),estrategiaInscripcion= new GradoDeAvance())
+   const baseDatos = new Materia(creditos = 100,año=1,requerimiento = new Credito(creditosNecesarios=100),estrategiaInscripcion= new OrdenDeLlegada())
+   const objetos2 = new Materia(creditos= 200, año = 2, requerimiento = new Correlativa(correlativas=#{objetos1,matematicas1}),estrategiaInscripcion=new Elitista())
+   const objetos3 = new Materia(creditos = 400, año = 3, requerimiento= new Correlativa(correlativas= #{objetos2,baseDatos}),estrategiaInscripcion= new Elitista())
+   const trabajoFinal = new Materia(creditos= 100,año=2,requerimiento = new Credito(creditosNecesarios = 50),estrategiaInscripcion= new Elitista())
    
 
-   const concurrente = new Materia(creditos=150,año=3,requerimiento = new Correlativa(correlativas= #{objetos1,baseDatos}))
+   const concurrente = new Materia(creditos=150,año=3,requerimiento = new Correlativa(correlativas= #{objetos1,baseDatos}),estrategiaInscripcion= new Elitista())
 
-   const quimica = new Materia(creditos=50,año=1,requerimiento= new Nada())
-   const bio1 = new Materia(creditos=50,año=1,requerimiento= new Nada())
-   const bio2 = new Materia(creditos=100,año=2,requerimiento = new Correlativa(correlativas=#{bio1}))
-   const anaGeneral = new Materia(creditos=100, año=1, requerimiento= new Credito(creditosNecesarios=30))
+   const quimica = new Materia(creditos=50,año=1,requerimiento= new Nada(),estrategiaInscripcion= new Elitista())
+   const bio1 = new Materia(creditos=50,año=1,requerimiento= new Nada(),estrategiaInscripcion= new Elitista())
+   const bio2 = new Materia(creditos=100,año=2,requerimiento = new Correlativa(correlativas=#{bio1}),estrategiaInscripcion= new Elitista())
+   const anaGeneral = new Materia(creditos=100, año=1, requerimiento= new Credito(creditosNecesarios=30),estrategiaInscripcion= new Elitista())
 
    const roque = new Estudiante()
    const luisa = new Estudiante()
@@ -52,18 +52,10 @@ describe "Materia" {
     medicina.agregarMateria(bio1)
     medicina.agregarMateria(bio2)
 
-    bio2.agregarCoorrelativa(bio1)
 
-    objetos2.agregarCoorrelativa(objetos1)
-    objetos2.agregarCoorrelativa(matematicas1)
     objetos2.cupoMaximo(3)
 
     
-    objetos3.agregarCoorrelativa(objetos2)
-    objetos3.agregarCoorrelativa(baseDatos)
-
-    concurrente.agregarCoorrelativa(objetos1)
-    concurrente.agregarCoorrelativa(baseDatos)
 
     medicina.agregarMateria(quimica)
     medicina.agregarMateria(bio1)
@@ -144,13 +136,13 @@ describe "Materia" {
    assert.notThat(roque.estaInscripto(objetos2))
  }
 
- test "roque Debe tener  todas las materias que tienen como correlativa a objetos2 (objetos1,matematicas1)" {
-   assert.that(roque.esAptoParaCursar(objetos2))
+ test "roque Debe tener  todas las materias que tienen como correlativa a objetos2 " {
+   assert.that(roque.aptoParaInscribirse(objetos2))
  }
 
  test "roque puede inscribirse en objetos2" {
 
-    assert.that(roque.puedeInscribirse(objetos2))
+    assert.that(roque.aptoParaInscribirse(objetos2))
  }
 
   test "roque queda inscripto en  objetos 2 pero no puede inscribirse  en objetos 3" {
@@ -175,7 +167,7 @@ describe "Materia" {
    objetos2.agregarEspera(rosita)
    objetos2.darDeBaja(roque)
 
-   assert.equals([], objetos2.estudiantesEspera())
+   assert.equals([], objetos2.estudiantesEnEspera())
    assert.that(rosita.estaInscripto(objetos2))
    assert.notThat(roque.estaInscripto(objetos2))
 
@@ -213,7 +205,7 @@ describe "Materia" {
    roque.inscribirse(objetos2)
 
    assert.equals(#{luisa,romina,alicia}, objetos2.inscriptos())
-   assert.equals([roque], objetos2.estudiantesEspera())
+   assert.equals([roque], objetos2.estudiantesEnEspera())
   }
 
   test "romina se da de baja en objetos 2 entonces roque pasa a tener la confirmacion de la materia"

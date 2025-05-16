@@ -27,9 +27,12 @@ class Estudiante {
 
     method cantidadAprobadas() = materiasAprobadas.size()
 
-    method tieneAprobada(materia) = materiasAprobadas.any({aprobacion => aprobacion.materia() == materia})
+    method tieneAprobada(materia) = self.esMateriaAprobada(materia)
+    //materiasAprobadas.any({aprobacion => aprobacion.materia() == materia})
 
-    method materiasAprobadas() = materiasAprobadas
+    method esMateriaAprobada(materia) = self.materiasAprobadas().contains(materia)
+
+    method materiasAprobadas() = materiasAprobadas.map{aprobada => aprobada.materia()}.asSet()
 
     method materiasQueDebeCursar() = self.todasLasMaterias().asSet()
 
@@ -38,14 +41,13 @@ class Estudiante {
     // punto 5... 4 condiciones para que el alumno pueda inscribirse  en la materia. No esta terminado
     method puedeInscribirse(materia){
 
-        return materia.correspondeACarrera(self) && (! self.tieneAprobada(materia)) && (!self.estaInscripto(materia)) && self.esAptoParaCursar(materia)
+        return materia.correspondeACarrera(self) && (! self.tieneAprobada(materia)) && (!self.estaInscripto(materia)) && self.aptoParaInscribirse(materia)
     }
 
     method estaInscripto(materia) = materia.estaInscripto(self)
 
     method tieneQueCursar(materia) = self.todasLasMaterias().contains(materia)
     
-    method esAptoParaCursar(materia) = materia.coorrelativas().all({materia => self.tieneAprobada(materia)})
 
     method inscribirse(materia){
         self.validarInscribirse(materia)
@@ -82,30 +84,29 @@ class Estudiante {
     }
 
     method creditosDeAprobadas(){
-        return materiasAprobadas.map({materia=> materia.creditos()})
+        return materiasAprobadas.map({aprobada=> aprobada.creditosDeMateria()})
+    }
+
+    method aptoParaInscribirse(materia){
+        return materia.requerimientoParaInscribirse(self)
+        
     }
 }
 
 class Materia {
     const inscriptos = #{}
-    const coorrelativas= #{}
     var cupoMaximo = 30
-    const estudiantesEspera = []
+    const estrategiaInscripcion 
     var property creditos
     var property año
-    var requerimiento
+    const requerimiento
      
      
-
-    method agregarCoorrelativa(materia){
-        coorrelativas.add(materia)
-    }
-
     method inscribir(estudiante){
         if(cupoMaximo > self.cantInscriptos()){
         inscriptos.add(estudiante)
         } else {
-            estudiantesEspera.add(estudiante)
+            self.agregarEspera(estudiante)
         }
     }
 
@@ -115,8 +116,6 @@ class Materia {
 
     method estaInscripto(estudiante) = inscriptos.contains(estudiante)
 
-    method coorrelativas() = coorrelativas
-
     method inscriptos() = inscriptos
 
     method darDeBaja(estudiante){
@@ -125,20 +124,19 @@ class Materia {
     }
 
     method darDeAltaEnEspera(){
-        if(! estudiantesEspera.isEmpty()){
-            inscriptos.add(estudiantesEspera.first())
-            estudiantesEspera.remove(estudiantesEspera.first())
+        if(! self.estudiantesEnEspera().isEmpty()){
+            estrategiaInscripcion.inscribirEstudiante(self)
         }
     }
 
     method agregarEspera(estudiante){
-        estudiantesEspera.add(estudiante)
+        estrategiaInscripcion.estudiantesEnEspera().add(estudiante)
     }
 
-    method estudiantesEspera() = estudiantesEspera
+    method estudiantesEnEspera() = estrategiaInscripcion.estudiantesEnEspera()
 
     method estaEnEspera(estudiante){
-        return estudiantesEspera.contains(estudiante)
+        return estrategiaInscripcion.estudiantesEnEspera().contains(estudiante)
     }
 
     method puedeInscribirse(estudiante){
@@ -147,6 +145,12 @@ class Materia {
 
     method cupoMaximo(_cupoMaximo){
         cupoMaximo = _cupoMaximo
+    }
+
+    method requerimiento() = requerimiento
+
+    method requerimientoParaInscribirse(estudiante){
+        return requerimiento.cumpleRequerimiento(estudiante)
     }
 
     
@@ -164,6 +168,10 @@ class Aprobacion {
     method materia() = materia
 
     method nota() = nota
+
+    method creditosDeMateria(){
+        return materia.creditos()
+    }
 
 
 
@@ -194,7 +202,7 @@ class Requerimiento{
 
 class Nada inherits Requerimiento{
 
-    override method  cumpleRequerimiento(estudiente) = true
+    override method  cumpleRequerimiento(estudiante) = true
 }
 
 class Credito inherits Requerimiento{
@@ -222,6 +230,50 @@ class PorAño inherits Requerimiento{
 class Correlativa inherits Requerimiento{
     const correlativas 
     override method cumpleRequerimiento(estudiante){
-        correlativas.all({materia => estudiante.tieneAprobada(materia)})
+      return   correlativas.all({materia => estudiante.tieneAprobada(materia)})
     }
+}
+
+class ListaEspera {
+    const estudiantesEspera =[]
+
+    method inscribirEstudiante(materia)
+
+   
+
+    method estudiantesEnEspera() = estudiantesEspera
+
+}
+
+class OrdenDeLlegada inherits ListaEspera{
+
+    
+     override  method inscribirEstudiante(materia) {
+        materia.inscribir(estudiantesEspera.first())
+        estudiantesEspera.remove(estudiantesEspera.first())
+      } 
+
+    
+
+}
+
+class Elitista inherits ListaEspera{
+
+    override method inscribirEstudiante(materia){
+        materia.inscribir(self.estudianteConMasPromedio())
+        estudiantesEspera.remove(self.estudianteConMasPromedio())
+    }
+
+    method estudianteConMasPromedio() = estudiantesEspera.max({estudiante=> estudiante.promedio()})
+}
+
+class GradoDeAvance inherits ListaEspera{
+
+    override method inscribirEstudiante(materia){
+
+        materia.inscribir(self.estudianteConMasMateriasAprobadas())
+        estudiantesEspera.remove(self.estudianteConMasMateriasAprobadas())
+    }
+
+    method estudianteConMasMateriasAprobadas() = estudiantesEspera.max({estudiante => estudiante.cantidadAprobadas()})
 }
